@@ -1,5 +1,8 @@
 venv/
 .env
 config.py
-__pycach__/
+__pycache__/
 migrate_hint.txt
+session_hint.txt
+mod_admin/__pycache__/
+mod_users/__pycache__/
