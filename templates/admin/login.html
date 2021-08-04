@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+{% block title %}Login Page{% endblock %}
+{% block content %}
+<form action="{{ url_for('admin.login') }}" method="post" xmlns:div="http://www.w3.org/1999/html">
+    {% with messages = get_flashed_messages(True) %}
+      {% if messages %}
+          <div class="row">
+              {% for category, message in messages %}
+              <div class="card {{ category }}">
+                  <div class="section">
+                     <p> {{ message }}</p>
+                  </div>
+              </div>
+          </div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+    {{ form.hidden_tag() }}
+    {{ form.email.label }}: {{ form.email }} <br/>
+    {{ form.password.label }}: {{ form.password }} <br/>
+    <input type="submit" value="Login">
+</form>
+{% endblock %}
