@@ -1,0 +1,11 @@
+{% extends 'blog/basic.html' %}
+{% block title %}Blog{% endblock %}
+{% include 'blog/_includes/navigation.html' %}
+{% block page_content %}
+    {% for post in posts %}
+        <div>
+            <h2><a href="{{ url_for('blog.single_post', slug=post.slug) }}">{{ post.title }}</a></h2>
+            <p>{{ post.summary or post.content | truncate(3, True, '...')}}</p>
+        </div>>
+    {% endfor %}
+{% endblock %}
