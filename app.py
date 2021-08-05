@@ -13,9 +13,12 @@ from views import index
 
 from mod_admin import admin
 from mod_users import users
+from mod_blog import blog
 
 app.register_blueprint(admin)
 app.register_blueprint(users)
+app.register_blueprint(blog)
+
 
 if __name__ == '__main__':
     app.run()
