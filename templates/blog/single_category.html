@@ -1,0 +1,7 @@
+{% extends 'blog/basic.html' %}
+{% block title %}{{ category.name }}{% endblock %}
+{% include 'blog/_includes/navigation.html' %}
+{% block page_content %}
+    <h1>{{ category.name }}</h1>
+    <p>{{ category.description }}</p>
+{% endblock %}

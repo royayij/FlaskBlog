@@ -15,3 +15,15 @@ class ModifyPostForm(FlaskForm):
     summary = TextAreaField()
     content = TextAreaField(validators=[DataRequired()])
     slug = TextField(validators=[DataRequired()])
+
+
+class CreateCategoryForm(FlaskForm):
+    description = TextAreaField()
+    name = TextField(validators=[DataRequired()])
+    slug = TextField(validators=[DataRequired()])
+
+
+class ModifyCategoryForm(FlaskForm):
+    description = TextAreaField()
+    name = TextField(validators=[DataRequired()])
+    slug = TextField(validators=[DataRequired()])
