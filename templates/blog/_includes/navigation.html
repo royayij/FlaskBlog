@@ -2,6 +2,14 @@
 
     <a href="{{ url_for('blog.index') }}" class="button">Blog</a>
     <a href="{{ url_for('users.register') }}" class="button">Register</a>
-
     <h1>Blog</h1>
 </header>
+<div>
+    <img src="{{ url_for('static', filename='images/python-logo-master-v3-TM.png')}}" alt='Python Logo'>
+</div>
+<div>
+    <form action="{{ url_for('blog.search_blog') }}" method="GET">
+        {{ search_form.search_query }}
+        <input type="submit" value="Search">
+    </form>
+</div>

@@ -3,8 +3,12 @@ from flask import request, render_template, abort, flash, session, redirect, url
 from mod_users.forms import LoginForm, RegisterForm
 from mod_users.models import User
 from .utils import admin_only_view
-from mod_blog.forms import CreatePostForm, ModifyPostForm, CreateCategoryForm, ModifyCategoryForm
+from mod_blog.forms import PostForm, CategoryForm
 from mod_blog.models import Post, Category
+from mod_uploads.forms import FileUploadForm
+from mod_uploads.models import File
+from werkzeug.utils import secure_filename
+import uuid
 from app import db
 from sqlalchemy.exc import IntegrityError
 
@@ -57,7 +61,9 @@ def logout():
 
 @admin.route('create/new', methods=['GET', 'POST'])
 def create_post():
-    form = CreatePostForm(request.form)
+    form = PostForm(request.form)
+    categories = Category.query.all()
+    form.categories.choices = [(category.id, category.name) for category in categories]
     if request.method == 'POST':
         if not form.validate_on_submit():
             abort(400)
@@ -66,6 +72,7 @@ def create_post():
         post.slug = form.slug.data
         post.summary = form.summary.data
         post.content = form.content.data
+        post.categories = [Category.query.get(category_id) for category_id in form.categories.data]
         try:
             db.session.add(post)
             db.session.commit()
@@ -139,7 +146,11 @@ def delete_post(post_id):
 @admin_only_view
 def modify_post(post_id):
     post = Post.query.get_or_404(post_id)
-    form = ModifyPostForm(obj=post)
+    form = PostForm(obj=post)
+    categories = Category.query.all()
+    form.categories.choices = [(category.id, category.name) for category in categories]
+    if request.method != 'POST':
+        form.categories.data = [category.id for category in post.categories]
     if request.method == 'POST':
         if not form.validate_on_submit():
             abort(400)
@@ -147,6 +158,7 @@ def modify_post(post_id):
         post.slug = form.slug.data
         post.summary = form.summary.data
         post.content = form.content.data
+        post.categories = [Category.query.get(category_id) for category_id in form.categories.data]
         try:
             db.session.commit()
             flash("Post Modified!")
@@ -161,7 +173,7 @@ def modify_post(post_id):
 @admin.route('/categories/new', methods=['GET', 'POST'])
 @admin_only_view
 def create_category():
-    form = CreateCategoryForm(request.form)
+    form = CategoryForm(request.form)
     if request.method == 'POST':
         if not form.validate_on_submit():
             abort(400)
@@ -202,7 +214,7 @@ def delete_category(category_id):
 @admin_only_view
 def modify_category(category_id):
     category = Category.query.get_or_404(category_id)
-    form = ModifyCategoryForm(obj=category)
+    form = CategoryForm(obj=category)
     if request.method == 'POST':
         if not form.validate_on_submit():
             abort(400)
@@ -218,3 +230,26 @@ def modify_category(category_id):
             flash('slug duplicated')
             return redirect(url_for('admin.list_categories'))
     return render_template('admin/modify_category.html', form=form, category=category)
+
+
+@admin.route('/library/upload', methods=['POST', 'GET'])
+@admin_only_view
+def upload_file():
+    form = FileUploadForm()
+    if request.method == 'POST':
+        if not form.validate_on_submit():
+            abort(400)
+        file = File()
+        filename = "{}_{}".format(uuid.uuid1(), secure_filename(form.file.data.filename))
+        file.filename = filename
+        try:
+            db.session.add(file)
+            db.session.commit()
+            form.file.data.save('static/uploads/{}'.format(filename))
+            print(form.file.data)
+            flash('File Uploaded on {}'.format(url_for("static", filename="uploads/{}".format(filename), _external=True)))
+        except IntegrityError:
+            db.session.rollback()
+            flash('Upload Failed.', 'error')
+    return render_template('admin/upload_file.html', form=form)
+
